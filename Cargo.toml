@@ -6,3 +6,4 @@ authors = ["Thijs Vermeir <thijsvermeir@gmail.com>"]
 [dependencies]
 num-traits = "0.1.32"
 image = "*"
+clap = "*"
