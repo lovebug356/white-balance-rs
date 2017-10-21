@@ -25,29 +25,54 @@ fn main() {
             .long("output")
             .takes_value(true)
             .required(true)
-        ).get_matches ();
+        )
+        .arg(clap::Arg::with_name("method")
+            .help("white balancing method")
+            .short("m")
+            .long("method")
+            .takes_value(true)
+            .required(false)
+        )
+        .get_matches ();
 
-    match matches.subcommand_name() {
-        Some("gray-world") => {
-            let matches = matches.subcommand_matches("gray-world").unwrap();
-            let input_filename = matches.value_of("input").unwrap();
-            let output_filename = matches.value_of("output").unwrap();
-
-            println!("Gray world conversion:");
-            println!("\tInput: {}", input_filename);
-            println!("\tOutput: {}", output_filename);
-
-            let original_image = image::open(&input_filename)
-                .unwrap();
-            let orig_rgb = original_image.to_rgb();
-            let enhanced_image = white_balance::GrayWorld::white_balance(&orig_rgb);
-
-            let fout = &mut File::create(&Path::new(output_filename)).unwrap();
-            image::ImageRgb8(enhanced_image).save(fout, image::PNG)
-                .unwrap();
+    let input_filename = matches.value_of("input").unwrap();
+    let output_filename = matches.value_of("output").unwrap();
+    let method = match matches.value_of("method") {
+        Some(method) => {
+            method
+        },
+        None => {
+            "gray-world"
         }
+    };
+
+    println!("Auto white balancing:");
+    println!("\tMethod: {}", method);
+    println!("\tInput: {}", input_filename);
+    println!("\tOutput: {}", output_filename);
+
+    let original_image = image::open(&input_filename)
+        .unwrap();
+    let orig_rgb = original_image.to_rgb();
+    let enhanced_image = match method {
+        "gray-world" => {
+            Some(white_balance::GrayWorld::white_balance(&orig_rgb))
+        },
         _ => {
-            eprintln!("Subcommand not recognized.")
+            eprintln!("Auto white balancing method '{}' not found", method);
+            None
+        }
+    };
+
+    match enhanced_image {
+        Some(enh_image) => {
+            let fout = &mut File::create(&Path::new(output_filename)).unwrap();
+            image::ImageRgb8(enh_image).save(fout, image::PNG)
+                .unwrap();
+        },
+        None => {
+            eprintln!("Failed to convert with method: '{}'", method);
         }
     }
+
 }
