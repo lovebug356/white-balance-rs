@@ -7,3 +7,5 @@ authors = ["Thijs Vermeir <thijsvermeir@gmail.com>"]
 num-traits = "0.1.32"
 image = "*"
 clap = "*"
+nalgebra = "0.10.*"
+num = "*"
