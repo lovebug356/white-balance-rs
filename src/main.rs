@@ -5,7 +5,7 @@ extern crate white_balance;
 use std::fs::File;
 use std::path::Path;
 
-use white_balance::traits::AutoWhiteBalance;
+use white_balance::{AutoWhiteBalance, AutoWhiteBalanceMethod};
 
 fn main() {
     let matches = clap::App::new("white-balance")
@@ -24,12 +24,12 @@ fn main() {
             .short("o")
             .long("output")
             .takes_value(true)
-            .required(true)
+            .required(false)
         )
-        .arg(clap::Arg::with_name("method")
-            .help("white balancing method")
+        .arg(clap::Arg::with_name("auto")
+            .help("white balancing auto")
             .short("m")
-            .long("method")
+            .long("auto")
             .takes_value(true)
             .required(false)
         )
@@ -43,49 +43,57 @@ fn main() {
         .get_matches ();
 
     let input_filename = matches.value_of("input").unwrap();
-    let output_filename = matches.value_of("output").unwrap();
-    let method = match matches.value_of("method") {
-        Some(method) => {
-            method
+    if !filename_has_extension(input_filename) {
+        eprintln!("Filename does not have an extension.");
+        return;
+    }
+
+    let method = match matches.value_of("auto") {
+        Some(method_str) => {
+            match method_str {
+                "gray-world" => Some(AutoWhiteBalanceMethod::GrayWorld),
+                "retinex" => Some(AutoWhiteBalanceMethod::Retinex),
+                "gray-retinex" => Some(AutoWhiteBalanceMethod::GrayRetinex),
+                _ => {
+                    eprintln!("Auto white balancing auto '{}' not found", method_str);
+                    return;
+                }
+            }
         },
         None => {
-            "gray-world"
+            Some(AutoWhiteBalanceMethod::GrayWorld)
         }
-    };
+    }.unwrap();
 
-    let input_image = image::open(&input_filename)
-        .unwrap();
+    let input_image = image::open(&input_filename).unwrap();
     let rgb_image = input_image.to_rgb();
     let (width, height) = rgb_image.dimensions();
 
     println!("Auto white balancing:");
     println!("\tInput: {} ({}x{})", input_filename, width, height);
+
+    let output_filename: String = build_output_filename(input_filename,
+                                                        matches.value_of("output"),
+                                                        &method);
     println!("\tOutput: {} -> {}", method, output_filename);
+    let enhanced_image = rgb_image.auto_white_balance(method);
+    let fout = &mut File::create(&Path::new(&output_filename)).unwrap();
+    image::ImageRgb8(enhanced_image).save(fout, image::PNG).unwrap();
+}
 
-    let enhanced_image = match method {
-        "gray-world" => {
-            Some(white_balance::GrayWorld::white_balance(&rgb_image))
-        },
-        "retinex" => {
-            Some(white_balance::Retinex::white_balance(&rgb_image))
-        },
-        "gray-retinex" => {
-            Some(white_balance::GrayRetinex::white_balance(&rgb_image))
-        },
-        _ => {
-            eprintln!("Auto white balancing method '{}' not found", method);
-            None
-        }
-    };
+fn filename_has_extension(filename: &str) -> bool {
+    let split: Vec<&str> = filename.rsplitn(2, ".").collect();
+    split.len() == 2
+}
 
-    match enhanced_image {
-        Some(enh_image) => {
-            let fout = &mut File::create(&Path::new(output_filename)).unwrap();
-            image::ImageRgb8(enh_image).save(fout, image::PNG)
-                .unwrap();
-        },
+fn build_output_filename(input_filename: &str,
+                         output_filename: Option<&str>,
+                         method: &AutoWhiteBalanceMethod) -> String {
+    match output_filename {
+        Some(filename) => String::from(filename),
         None => {
-            eprintln!("Failed to convert with method: '{}'", method);
+            let string_split: Vec<&str> = input_filename.rsplitn(2,".").collect();
+            format!("{}-{}.{}", string_split[1], method.to_string(), string_split[0])
         }
     }
 }
