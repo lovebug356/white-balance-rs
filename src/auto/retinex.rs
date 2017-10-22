@@ -1,7 +1,7 @@
 use image;
 use image::Pixel;
-use ::math::PixelMath;
-use scale::scale_pixel;
+use ::image_ext::math::PixelMath;
+use ::math::scale::scale_pixel;
 
 pub fn auto_white_balance(image: &image::RgbImage) -> image::RgbImage {
     let (width, height) = image.dimensions();
