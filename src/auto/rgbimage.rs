@@ -7,15 +7,15 @@ use ::gray_world;
 use ::gray_retinex;
 
 impl AutoWhiteBalance for image::RgbImage {
-    fn auto_white_balance(&self, method: AutoWhiteBalanceMethod) -> image::RgbImage {
+    fn auto_white_balance(&self, method: &AutoWhiteBalanceMethod) -> image::RgbImage {
         match method {
-            AutoWhiteBalanceMethod::GrayWorld => {
+            &AutoWhiteBalanceMethod::GrayWorld => {
                 gray_world::auto_white_balance(&self)
             },
-            AutoWhiteBalanceMethod::Retinex => {
+            &AutoWhiteBalanceMethod::Retinex => {
                 retinex::auto_white_balance(&self)
             },
-            AutoWhiteBalanceMethod::GrayRetinex => {
+            &AutoWhiteBalanceMethod::GrayRetinex => {
                 gray_retinex::auto_white_balance(&self)
             }
         }

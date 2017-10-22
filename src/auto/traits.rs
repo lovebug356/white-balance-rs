@@ -18,7 +18,7 @@ impl fmt::Display for AutoWhiteBalanceMethod {
 }
 
 pub trait AutoWhiteBalance {
-    fn auto_white_balance(&self, method: AutoWhiteBalanceMethod) -> Self;
+    fn auto_white_balance(&self, method: &AutoWhiteBalanceMethod) -> Self;
 }
 
 #[cfg(test)]

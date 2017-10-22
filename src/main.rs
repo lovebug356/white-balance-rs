@@ -33,12 +33,12 @@ fn main() {
             .takes_value(true)
             .required(false)
         )
-        .arg(clap::Arg::with_name("all-methods")
+        .arg(clap::Arg::with_name("all")
             .help("use all methods")
             .short("a")
             .long("all")
-            .takes_value(false)
             .required(false)
+            .conflicts_with_all(&["auto", "output"])
         )
         .get_matches ();
 
@@ -48,7 +48,15 @@ fn main() {
         return;
     }
 
-    let method = match matches.value_of("auto") {
+    let input_image = image::open(&input_filename).unwrap();
+    let rgb_image = input_image.to_rgb();
+    let (width, height) = rgb_image.dimensions();
+
+    println!("Auto white balancing:");
+    println!("\tInput: {} ({}x{})", input_filename, width, height);
+
+    let all_methods = matches.is_present("all");
+    let user_method = match matches.value_of("auto") {
         Some(method_str) => {
             match method_str {
                 "gray-world" => Some(AutoWhiteBalanceMethod::GrayWorld),
@@ -61,22 +69,45 @@ fn main() {
             }
         },
         None => {
-            Some(AutoWhiteBalanceMethod::GrayWorld)
+            if !all_methods {
+                eprintln!("Please select auto white balance method");
+                return;
+            }
+            None
+        },
+    };
+
+    match user_method {
+        Some(method) => {
+            do_auto_white_balance_for_method(input_filename,
+                                             matches.value_of("output"),
+                                             &method,
+                                             &rgb_image);
+        },
+        None => {
+            do_auto_white_balance_for_method(input_filename,
+                                             None,
+                                             &AutoWhiteBalanceMethod::GrayWorld,
+                                             &rgb_image);
+            do_auto_white_balance_for_method(input_filename,
+                                             None,
+                                             &AutoWhiteBalanceMethod::Retinex,
+                                             &rgb_image);
+            do_auto_white_balance_for_method(input_filename,
+                                             None,
+                                             &AutoWhiteBalanceMethod::GrayRetinex,
+                                             &rgb_image);
         }
-    }.unwrap();
+    }
+}
 
-    let input_image = image::open(&input_filename).unwrap();
-    let rgb_image = input_image.to_rgb();
-    let (width, height) = rgb_image.dimensions();
-
-    println!("Auto white balancing:");
-    println!("\tInput: {} ({}x{})", input_filename, width, height);
-
-    let output_filename: String = build_output_filename(input_filename,
-                                                        matches.value_of("output"),
-                                                        &method);
+fn do_auto_white_balance_for_method(input_filename: &str,
+                                    output_filename: Option<&str>,
+                                    method: &AutoWhiteBalanceMethod,
+                                    rgb_image: &image::RgbImage) {
+    let output_filename: String = build_output_filename(input_filename, output_filename, &method);
     println!("\tOutput: {} -> {}", method, output_filename);
-    let enhanced_image = rgb_image.auto_white_balance(method);
+    let enhanced_image = rgb_image.auto_white_balance(&method);
     let fout = &mut File::create(&Path::new(&output_filename)).unwrap();
     image::ImageRgb8(enhanced_image).save(fout, image::PNG).unwrap();
 }
