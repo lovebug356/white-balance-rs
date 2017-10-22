@@ -7,3 +7,5 @@ pub mod scale;
 
 pub mod auto;
 pub use auto::*;
+
+pub mod image_ext;

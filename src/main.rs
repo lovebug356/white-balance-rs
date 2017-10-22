@@ -6,6 +6,7 @@ use std::fs::File;
 use std::path::Path;
 
 use white_balance::{AutoWhiteBalance, AutoWhiteBalanceMethod};
+use white_balance::image_ext::imageformat::image_format_from_string;
 
 fn main() {
     let matches = clap::App::new("white-balance")
@@ -92,11 +93,11 @@ fn do_auto_white_balance_for_method(input_filename: &str,
                                     output_filename: Option<&str>,
                                     method: &AutoWhiteBalanceMethod,
                                     rgb_image: &image::RgbImage) {
-    let output_filename: String = build_output_filename(input_filename, output_filename, &method);
+    let (output_filename, image_format) = build_output_filename(input_filename, output_filename, &method);
     println!("\tOutput: {} -> {}", method, output_filename);
     let enhanced_image = rgb_image.auto_white_balance(&method);
     let fout = &mut File::create(&Path::new(&output_filename)).unwrap();
-    image::ImageRgb8(enhanced_image).save(fout, image::PNG).unwrap();
+    image::ImageRgb8(enhanced_image).save(fout, image_format).unwrap();
 }
 
 fn filename_has_extension(filename: &str) -> bool {
@@ -106,12 +107,23 @@ fn filename_has_extension(filename: &str) -> bool {
 
 fn build_output_filename(input_filename: &str,
                          output_filename: Option<&str>,
-                         method: &AutoWhiteBalanceMethod) -> String {
-    match output_filename {
-        Some(filename) => String::from(filename),
+                         method: &AutoWhiteBalanceMethod) -> (String, image::ImageFormat) {
+    let string_split: Vec<&str> = input_filename.rsplitn(2,".").collect();
+    let image_format = match image_format_from_string(string_split[0]) {
+        Some(format) => format,
         None => {
-            let string_split: Vec<&str> = input_filename.rsplitn(2,".").collect();
-            format!("{}-{}.{}", string_split[1], method.to_string(), string_split[0])
+            eprintln!("Did not find image format for '{}', using PNG as default", string_split[0]);
+            image::ImageFormat::PNG
+        }
+    };
+
+    match output_filename {
+        Some(filename) => (String::from(filename), image_format),
+        None => {
+            (
+                format!("{}-{}.{}", string_split[1], method.to_string(), string_split[0]),
+                image_format
+            )
         }
     }
 }
