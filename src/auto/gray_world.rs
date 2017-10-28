@@ -29,6 +29,7 @@ pub fn auto_white_balance(image: &image::RgbImage) -> image::RgbImage {
 #[cfg(test)]
 mod gray_test {
     use super::*;
+    use test::Bencher;
 
     #[test]
     fn test_equal_resolution() {
@@ -76,5 +77,19 @@ mod gray_test {
                 assert_eq!(white_p, exp_p);
             }
         }
+    }
+
+    #[bench]
+    fn bench_gray_world_hd_image(b: &mut Bencher) {
+        let frame_size = 1920 * 1080 * 3;
+        let data = vec![0x00; frame_size];
+        let x = image::RgbImage::from_vec(1920, 1080, data).unwrap();
+        let y = auto_white_balance(&x);
+
+        // 21,541,921 ns/iter
+        // 21,596,653 ns/iter
+        b.iter(||{
+            let y = auto_white_balance(&x);
+        });
     }
 }
