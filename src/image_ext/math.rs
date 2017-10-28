@@ -21,18 +21,19 @@ impl PixelMath for image::RgbImage {
 
     fn avg_per_channel(&self) -> (f32, f32, f32) {
         let (width, height) = self.dimensions();
-        let sum = self.pixels().fold((0u64, 0u64, 0u64), |sum, p| {
-            let channels = p.channels4();
-            (sum.0 + channels.0 as u64,
-             sum.1 + channels.1 as u64,
-             sum.2 + channels.2 as u64)
-        });
-        let avg = (
-            sum.0 as f32 / (width * height) as f32,
-            sum.1 as f32 / (width * height) as f32,
-            sum.2 as f32 / (width * height) as f32
-        );
-        avg
+        let pixel_count = width * height;
+        let mut sum = (0u64, 0u64, 0u64);
+        for pixel in self.pixels() {
+            let channels = pixel.channels();
+            sum.0 += channels[0] as u64;
+            sum.1 += channels[1] as u64;
+            sum.2 += channels[2] as u64;
+        };
+        (
+            sum.0 as f32 / (pixel_count) as f32,
+            sum.1 as f32 / (pixel_count) as f32,
+            sum.2 as f32 / (pixel_count) as f32
+        )
     }
 
     fn sum_of_squares_per_channel(&self) -> (f64, f64, f64) {

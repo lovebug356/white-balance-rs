@@ -9,3 +9,5 @@ image = "*"
 clap = "*"
 nalgebra = "0.10.*"
 num = "*"
+rand = "*"
+

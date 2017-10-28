@@ -14,9 +14,9 @@ pub fn auto_white_balance(image: &image::RgbImage) -> image::RgbImage {
             let p = image.get_pixel(x, y);
             let c = p.channels4();
             let p = image::Rgb::from_channels(
-                scale_pixel(c.0, rgb_max.1, rgb_max.0),
+                scale_pixel(c.0, rgb_max.1 as f32, rgb_max.0 as f32),
                 c.1,
-                scale_pixel(c.2, rgb_max.1, rgb_max.2),
+                scale_pixel(c.2, rgb_max.1 as f32, rgb_max.2 as f32),
                 0
             );
             out.put_pixel(x, y, p);

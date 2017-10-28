@@ -1,7 +1,9 @@
 use image;
 use image::Pixel;
+use image::GenericImage;
+use image::math::utils::clamp;
 
-use ::math::scale::scale_pixel;
+use ::math::scale::{scale_pixel};
 use ::image_ext::math::PixelMath;
 
 pub fn auto_white_balance(image: &image::RgbImage) -> image::RgbImage {
@@ -9,27 +11,43 @@ pub fn auto_white_balance(image: &image::RgbImage) -> image::RgbImage {
     let mut out = image::RgbImage::new(width, height);
     let avg = image.avg_per_channel();
 
-    for y in 0..height {
-        for x in 0..width {
-            let p = image.get_pixel(x, y);
-            let c = p.channels4();
-            let p = image::Rgb::from_channels(
-                scale_pixel(c.0, avg.1, avg.0),
-                c.1,
-                scale_pixel(c.2, avg.1, avg.2),
-                0
-            );
-            out.put_pixel(x, y, p);
-        }
+    for (p_in, p_out) in image.pixels().zip(out.pixels_mut()) {
+//        let c = p_in.channels4();
+        let c = p_in.channels();
+        *p_out = image::Rgb([
+            scale_pixel(c[0], avg.1, avg.0),
+            c[1],
+            scale_pixel(c[2], avg.1, avg.2)
+        ])
     }
 
     out
+}
+
+pub fn auto_white_balance_get_pixel(image: &image::RgbImage, out: &mut image::RgbImage) {
+    let (width, height) = image.dimensions();
+    let avg = image.avg_per_channel();
+
+    for y in 0..height {
+        for x in 0..width {
+            let c = image.get_pixel(x, y).channels();
+            let p = image::Rgb([
+//                clamp((c[0] as f32 * avg.1 / avg.0) as u8, 0u8, 255u8),
+                scale_pixel(c[0], avg.1, avg.0),
+                c[1],
+//                clamp((c[2] as f32 * avg.1 / avg.2) as u8, 0u8, 255u8)
+                scale_pixel(c[2], avg.1, avg.2)
+            ]);
+            out.put_pixel(x, y, p);
+        }
+    }
 }
 
 #[cfg(test)]
 mod gray_test {
     use super::*;
     use test::Bencher;
+    use rand::{thread_rng, Rng};
 
     #[test]
     fn test_equal_resolution() {
@@ -82,14 +100,34 @@ mod gray_test {
     #[bench]
     fn bench_gray_world_hd_image(b: &mut Bencher) {
         let frame_size = 1920 * 1080 * 3;
-        let data = vec![0x00; frame_size];
-        let x = image::RgbImage::from_vec(1920, 1080, data).unwrap();
-        let y = auto_white_balance(&x);
+        let mut data = vec![0x00; frame_size];
+        thread_rng().fill_bytes(&mut data);
+        let x = image::RgbImage::from_vec(
+            1920, 1080, data).unwrap();
 
+        // On Mac Mini:
         // 21,541,921 ns/iter
         // 21,596,653 ns/iter
-        b.iter(||{
-            let y = auto_white_balance(&x);
+        //
+        // On Laptop:
+        // 19,366,845 ns/iter
+        // 20,472,289 ns/iter
+        b.iter(|| {
+            auto_white_balance(&x);
         });
+    }
+
+    #[bench]
+    fn bench_gray_world_hd_image_get_pixel(b: &mut Bencher) {
+        let frame_size = 1920 * 1080 * 3;
+        let mut data = vec![0x00; frame_size];
+        thread_rng().fill_bytes(&mut data);
+        let x = image::RgbImage::from_vec(
+            1920, 1080, data).unwrap();
+        let mut out = image::RgbImage::new(1920, 1080);
+
+        b.iter(||{
+            auto_white_balance_get_pixel(&x, &mut out);
+        })
     }
 }
