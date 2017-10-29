@@ -14,8 +14,6 @@ macro_rules! impl_to_from_u8 {
                 fn to_u8(self) -> u8 {
                     if self > Self::from(u8::max_value()) {
                         u8::max_value()
-                    } else if self < Self::from(u8::min_value()) {
-                        u8::min_value()
                     } else {
                         self as u8
                     }
@@ -40,4 +38,23 @@ pub fn scale_pixel<T: ToFromu8>(pixel: u8, numerator: T, denominator: T) -> u8
         where T: Clone + Mul<T, Output = T> + Div<T, Output = T>{
     let res = T::from_u8(pixel) * numerator / denominator;
     res.to_u8()
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_normal_scaling() {
+        assert_eq!(scale_pixel(10u8, 2f32, 1f32), 20u8);
+        assert_eq!(scale_pixel(10u8, 1f32, 2f32), 5u8);
+        assert_eq!(scale_pixel(10u8, 2f64, 1f64), 20u8);
+        assert_eq!(scale_pixel(10u8, 1f64, 2f64), 5u8);
+    }
+
+    #[test]
+    fn test_overflow() {
+        let new_pixel = scale_pixel(250, 2f32, 1f32);
+        assert_eq!(new_pixel, 255u8);
+    }
 }
