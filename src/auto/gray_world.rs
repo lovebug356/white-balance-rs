@@ -1,7 +1,6 @@
 use image;
+use image::Rgb;
 use image::Pixel;
-use image::GenericImage;
-use image::math::utils::clamp;
 
 use ::math::scale::{scale_pixel};
 use ::image_ext::math::PixelMath;
@@ -11,14 +10,16 @@ pub fn auto_white_balance(image: &image::RgbImage) -> image::RgbImage {
     let mut out = image::RgbImage::new(width, height);
     let avg = image.avg_per_channel();
 
-    for (p_in, p_out) in image.pixels().zip(out.pixels_mut()) {
-//        let c = p_in.channels4();
-        let c = p_in.channels();
-        *p_out = image::Rgb([
-            scale_pixel(c[0], avg.1, avg.0),
-            c[1],
-            scale_pixel(c[2], avg.1, avg.2)
-        ])
+    for y in 0..height {
+        for x in 0..width {
+            let channels = image.get_pixel(x, y).channels();
+            let new_pixel = Rgb([
+                scale_pixel(channels[0], avg.1, avg.0),
+                channels[1],
+                scale_pixel(channels[2], avg.1, avg.2)
+            ]);
+            out.put_pixel(x, y, new_pixel);
+        }
     }
 
     out
@@ -30,15 +31,13 @@ pub fn auto_white_balance_get_pixel(image: &image::RgbImage, out: &mut image::Rg
 
     for y in 0..height {
         for x in 0..width {
-            let c = image.get_pixel(x, y).channels();
-            let p = image::Rgb([
-//                clamp((c[0] as f32 * avg.1 / avg.0) as u8, 0u8, 255u8),
-                scale_pixel(c[0], avg.1, avg.0),
-                c[1],
-//                clamp((c[2] as f32 * avg.1 / avg.2) as u8, 0u8, 255u8)
-                scale_pixel(c[2], avg.1, avg.2)
+            let channels = image.get_pixel(x, y).channels();
+            let new_pixel = image::Rgb([
+                scale_pixel(channels[0], avg.1, avg.0),
+                channels[1],
+                scale_pixel(channels[2], avg.1, avg.2)
             ]);
-            out.put_pixel(x, y, p);
+            out.put_pixel(x, y, new_pixel);
         }
     }
 }
@@ -108,10 +107,7 @@ mod gray_test {
         // On Mac Mini:
         // 21,541,921 ns/iter
         // 21,596,653 ns/iter
-        //
-        // On Laptop:
-        // 19,366,845 ns/iter
-        // 20,472,289 ns/iter
+        // -> 17,514,293 ns/iter
         b.iter(|| {
             auto_white_balance(&x);
         });
