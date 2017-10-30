@@ -25,23 +25,6 @@ pub fn auto_white_balance(image: &image::RgbImage) -> image::RgbImage {
     out
 }
 
-pub fn auto_white_balance_get_pixel(image: &image::RgbImage, out: &mut image::RgbImage) {
-    let (width, height) = image.dimensions();
-    let avg = image.avg_per_channel();
-
-    for y in 0..height {
-        for x in 0..width {
-            let channels = image.get_pixel(x, y).channels();
-            let new_pixel = image::Rgb([
-                scale_pixel(channels[0], avg.1, avg.0),
-                channels[1],
-                scale_pixel(channels[2], avg.1, avg.2)
-            ]);
-            out.put_pixel(x, y, new_pixel);
-        }
-    }
-}
-
 #[cfg(test)]
 mod gray_test {
     use super::*;
@@ -122,19 +105,5 @@ mod gray_test {
         b.iter(|| {
             auto_white_balance(&x);
         });
-    }
-
-    #[bench]
-    fn bench_gray_world_hd_image_get_pixel(b: &mut Bencher) {
-        let frame_size = 1920 * 1080 * 3;
-        let mut data = vec![0x00; frame_size];
-        thread_rng().fill_bytes(&mut data);
-        let x = image::RgbImage::from_vec(
-            1920, 1080, data).unwrap();
-        let mut out = image::RgbImage::new(1920, 1080);
-
-        b.iter(||{
-            auto_white_balance_get_pixel(&x, &mut out);
-        })
     }
 }
