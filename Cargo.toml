@@ -11,11 +11,11 @@ keywords = ["image", "processing", "multimedia"]
 
 [dependencies]
 num-traits = "0.1.32"
-image = "*"
-clap = "*"
-nalgebra = "0.10.*"
-num = "*"
-rand = "*"
+image = "0.17.0"
+clap = "2.27.1"
+nalgebra = "0.10.1"
+num = "0.1.40"
+rand = "0.3.17"
 
 [badges]
 travis-ci = { repository = "lovebug356/white-balance-rs", branch = "master" }
