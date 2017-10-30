@@ -9,4 +9,6 @@ script:
     - rustc --version
     - cargo build
     - cargo test
+    - cargo test --release
+    - cargo bench
 
