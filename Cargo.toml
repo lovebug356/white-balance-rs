@@ -1,8 +1,13 @@
 [package]
 name = "white-balance"
-description = "Rust implementation of white balance methods"
 version = "0.1.0"
 authors = ["Thijs Vermeir <thijsvermeir@gmail.com>"]
+description = "Rust implementation of white balance methods"
+homepage = "https://github.com/lovebug356/white-balance-rs"
+repository = "https://github.com/lovebug356/white-balance-rs"
+license = "MIT/Apache-2.0"
+readme = "README.md"
+keywords = ["image", "processing", "multimedia"]
 
 [dependencies]
 num-traits = "0.1.32"
@@ -12,3 +17,5 @@ nalgebra = "0.10.*"
 num = "*"
 rand = "*"
 
+[badges]
+travis-ci = { repository = "lovebug356/white-balance-rs", branch = "master" }
