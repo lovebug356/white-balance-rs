@@ -1,5 +1,6 @@
 [package]
 name = "white-balance"
+description = "Rust implementation of white balance methods"
 version = "0.1.0"
 authors = ["Thijs Vermeir <thijsvermeir@gmail.com>"]
 

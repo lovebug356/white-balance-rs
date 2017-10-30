@@ -58,7 +58,12 @@ mod gray_test {
 
     #[test]
     fn test_should_be_exact_copy_if_white_balance_is_ok() {
-        let data = vec![128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128];
+        let data = vec![
+            128, 128, 128,
+            128, 128, 128,
+            128, 128, 128,
+            128, 128, 128
+        ];
         let orig_image = image::RgbImage::from_vec(2, 2, data)
             .unwrap();
         let white_image = auto_white_balance(&orig_image);
@@ -77,12 +82,22 @@ mod gray_test {
     #[test]
     fn test_should_correct_red_and_blue_channels_to_average_green_channel() {
         let (width, height) = (2, 2);
-        let data = vec![100, 120, 200, 100, 120, 200, 100, 120, 200, 100, 120, 200];
+        let data = vec![
+            100, 120, 200,
+            100, 120, 200,
+            100, 120, 200,
+            100, 120, 200
+        ];
         let orig_image = image::RgbImage::from_vec(width, height, data)
             .unwrap();
         let white_image = auto_white_balance(&orig_image);
 
-        let exp_data = vec![120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120];
+        let exp_data = vec![
+            120, 120, 120,
+            120, 120, 120,
+            120, 120, 120,
+            120, 120, 120
+        ];
         let exp_image = image::RgbImage::from_vec(width, height, exp_data)
             .unwrap();
 
@@ -104,10 +119,6 @@ mod gray_test {
         let x = image::RgbImage::from_vec(
             1920, 1080, data).unwrap();
 
-        // On Mac Mini:
-        // 21,541,921 ns/iter
-        // 21,596,653 ns/iter
-        // -> 17,514,293 ns/iter
         b.iter(|| {
             auto_white_balance(&x);
         });

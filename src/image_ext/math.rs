@@ -8,19 +8,7 @@ pub struct RgbImageStats {
     pub avg: [f64; 3],
     pub sum: [u64; 3],
     pub sum_squares: [u64; 3],
-//    avg_square: [f32; 3],
-//    max_square: [u64; 3],
 }
-
-//impl Default for RgbImageStats {
-//    fn default() -> RgbImageStats {
-//        RgbImageStats {
-//            max: [0u8, 0u8, 0u8],
-//            avg: [0f32, 0f32, 0f32],
-//            sum: [0u64, 0u64, 0u64]
-//        }
-//    }
-//}
 
 pub trait PixelMath {
     fn max_per_channel(&self) -> (u8, u8, u8);
