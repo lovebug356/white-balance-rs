@@ -7,22 +7,21 @@ use ::image_ext::math::PixelMath;
 
 pub fn auto_white_balance(image: &image::RgbImage) -> image::RgbImage {
     let (width, height) = image.dimensions();
-    let mut out = image::RgbImage::new(width, height);
+    let mut output_image = image::RgbImage::new(width, height);
     let avg = image.avg_per_channel();
 
-    for y in 0..height {
-        for x in 0..width {
-            let channels = image.get_pixel(x, y).channels();
-            let new_pixel = Rgb([
-                scale_pixel(channels[0], avg.1, avg.0),
-                channels[1],
-                scale_pixel(channels[2], avg.1, avg.2)
-            ]);
-            out.put_pixel(x, y, new_pixel);
-        }
+    for (old_pixel, new_pixel) in image.pixels()
+            .zip(output_image.pixels_mut()) {
+        let channels = old_pixel.channels();
+
+        *new_pixel = Rgb([
+            scale_pixel(channels[0], avg.1, avg.0),
+            channels[1],
+            scale_pixel(channels[2], avg.1, avg.2)
+        ]);
     }
 
-    out
+    output_image
 }
 
 #[cfg(test)]

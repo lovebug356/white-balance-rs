@@ -9,17 +9,13 @@ pub fn auto_white_balance(image: &image::RgbImage) -> image::RgbImage {
 
     let rgb_max = image.max_per_channel();
 
-    for y in 0..height {
-        for x in 0..width {
-            let old_pixel = image.get_pixel(x, y);
-            let channels = old_pixel.channels();
-            let new_pixel = image::Rgb([
-                scale_pixel(channels[0], rgb_max.1 as f32, rgb_max.0 as f32),
-                channels[1],
-                scale_pixel(channels[2], rgb_max.1 as f32, rgb_max.2 as f32)
-            ]);
-            out.put_pixel(x, y, new_pixel);
-        }
+    for (old_pixel, new_pixel) in image.pixels().zip(out.pixels_mut()) {
+        let channels = old_pixel.channels();
+        *new_pixel = image::Rgb([
+            scale_pixel(channels[0], rgb_max.1 as f32, rgb_max.0 as f32),
+            channels[1],
+            scale_pixel(channels[2], rgb_max.1 as f32, rgb_max.2 as f32)
+        ]);
     }
 
     out
