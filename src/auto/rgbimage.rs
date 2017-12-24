@@ -1,10 +1,11 @@
 use image;
 
-use ::traits::{AutoWhiteBalance, AutoWhiteBalanceMethod};
+use super::traits::AutoWhiteBalance;
+use super::methods::AutoWhiteBalanceMethod;
 
-use ::retinex;
-use ::gray_world;
-use ::gray_retinex;
+use super::retinex;
+use super::gray_world;
+use super::gray_retinex;
 
 impl AutoWhiteBalance for image::RgbImage {
     fn auto_white_balance(&self, method: &AutoWhiteBalanceMethod) -> image::RgbImage {

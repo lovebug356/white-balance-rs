@@ -1,6 +1,6 @@
 use image;
 use image::Pixel;
-use ::image_ext::math::PixelMath;
+use ::image_ext::PixelMath;
 use ::math::scale::scale_pixel;
 
 pub fn auto_white_balance(image: &image::RgbImage) -> image::RgbImage {

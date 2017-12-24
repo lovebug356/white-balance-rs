@@ -7,8 +7,11 @@ extern crate num_traits;
 extern crate test;
 extern crate rand;
 
-pub mod image_ext;
-pub mod math;
+mod auto;
+mod image_ext;
+mod math;
 
-pub mod auto;
-pub use auto::*;
+pub use self::auto::AutoWhiteBalance;
+pub use self::auto::AutoWhiteBalanceMethod;
+
+pub use self::image_ext::image_format_from_string;

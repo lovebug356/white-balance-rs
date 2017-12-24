@@ -1,8 +1,10 @@
-pub mod gray_retinex;
-pub mod gray_world;
-pub mod retinex;
-pub mod traits;
-pub mod rgbimage;
+mod methods;
+mod traits;
+mod rgbimage;
 
-pub use ::traits::AutoWhiteBalanceMethod;
-pub use ::traits::AutoWhiteBalance;
+mod retinex;
+mod gray_retinex;
+mod gray_world;
+
+pub use self::methods::AutoWhiteBalanceMethod;
+pub use self::traits::AutoWhiteBalance;
