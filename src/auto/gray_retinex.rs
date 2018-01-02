@@ -70,7 +70,7 @@ mod test {
     use test::Bencher;
 
     #[bench]
-    fn bench_retinex_hd_image(b: &mut Bencher) {
+    fn bench_gray_retinex_hd_image(b: &mut Bencher) {
         let frame_size = 1920 * 1080 * 3;
         let mut data = vec![0x00; frame_size];
         thread_rng().fill_bytes(&mut data);

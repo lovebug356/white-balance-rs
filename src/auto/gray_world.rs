@@ -3,21 +3,21 @@ use image::Rgb;
 use image::Pixel;
 
 use ::math::scale::{scale_pixel};
-use ::image_ext::math::PixelMath;
+use ::image_ext::PixelStats;
 
 pub fn auto_white_balance(image: &image::RgbImage) -> image::RgbImage {
     let (width, height) = image.dimensions();
     let mut output_image = image::RgbImage::new(width, height);
-    let avg = image.avg_per_channel();
+    let mean = image.mean();
 
     for (old_pixel, new_pixel) in image.pixels()
             .zip(output_image.pixels_mut()) {
         let channels = old_pixel.channels();
 
         *new_pixel = Rgb([
-            scale_pixel(channels[0], avg.1, avg.0),
+            scale_pixel(channels[0], mean[1], mean[0]),
             channels[1],
-            scale_pixel(channels[2], avg.1, avg.2)
+            scale_pixel(channels[2], mean[1], mean[2])
         ]);
     }
 
