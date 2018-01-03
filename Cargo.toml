@@ -16,6 +16,7 @@ clap = "2.27.1"
 nalgebra = "0.10.1"
 num = "0.1.40"
 rand = "0.3.17"
+itertools = "0.7.4"
 
 [badges]
 travis-ci = { repository = "lovebug356/white-balance-rs", branch = "master" }

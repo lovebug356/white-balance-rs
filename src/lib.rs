@@ -6,6 +6,7 @@ extern crate num;
 extern crate num_traits;
 extern crate test;
 extern crate rand;
+extern crate itertools;
 
 mod auto;
 mod image_ext;
